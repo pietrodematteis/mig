@@ -3,7 +3,8 @@
 cd $(dirname "$0") # Go to directory containing script
 
 # clone and build spid-cie-oidc-django ---
-git clone https://github.com/italia/spid-cie-oidc-django.git
+# git clone https://github.com/italia/spid-cie-oidc-django.git
+git clone https://github.com/pietrodematteis/spid-cie-oidc-django.git
 rm ./spid-cie-oidc-django/docker-compose.yml
 cp ./edited_files/docker-compose.yml ./spid-cie-oidc-django/
 rm ./spid-cie-oidc-django/Dockerfile
