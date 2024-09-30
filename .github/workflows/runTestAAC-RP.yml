@@ -1,0 +1,40 @@
+name: EUT AAC RP
+
+on:
+  push:
+    branches:
+      - testplan-aac-as-rp
+  pull_request:
+    branches:
+      - testplan-aac-as-rp
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Build and run all components
+      run: |
+        cd testplans/spid-cie-oidc/implementations/aac-rp-federation/
+        chmod +x build_and_run.sh
+        ./build_and_run.sh
+
+    - name: Wait for the server to start
+      run: sleep 15
+
+    - name: Run script to send API test requests
+      run: |
+        cd testplans/spid-cie-oidc/implementations/aac-rp-federation/
+        docker exec spid-cie-oidc-django-burpsuite-1 chmod +x run_tests.sh
+        docker exec spid-cie-oidc-django-burpsuite-1 /run_tests.sh RP -p
+        docker cp spid-cie-oidc-django-burpsuite-1:/output.json output.json
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: output.json
+        path: testplans/spid-cie-oidc/implementations/aac-rp-federation/output.json
