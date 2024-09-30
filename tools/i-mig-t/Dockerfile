@@ -21,9 +21,6 @@ RUN wget -O firefox.tar.bz2 'https://download-installer.cdn.mozilla.net/pub/fire
 	tar xvf firefox.tar.bz2 -C /opt/ &&\
 	ln -s /opt/firefox/firefox /usr/bin/firefox
 
-# Set environment variable to run Firefox in headless mode
-ENV MOZ_HEADLESS=1
-
 # Copy burp config
 COPY ./config/burp/project-options.json /opt/BurpSuiteCommunity/
 COPY ./config/burp/user-options.json /opt/BurpSuiteCommunity/
@@ -41,9 +38,14 @@ COPY ./mig-t-beta-jar-with-dependencies.jar /root/
 # Copy mig-t configuration into home
 COPY ./config/mig-t/config.json /
 
-# Start configuration in headless mode
-# To disable headless mode remove -Djava.awt.headless=true
-CMD ["sh", "-c", "echo 'y' | java -Djava.awt.headless=true -jar \
-/opt/BurpSuiteCommunity/burpsuite_community.jar \
---user-config-file=/opt/BurpSuiteCommunity/user-options.json \
---config-file=/opt/BurpSuiteCommunity/project-options.json"]
+# Copy script to run BurpSuite
+COPY ./script/mig-t/startBurpMig.sh /
+RUN chmod +x startBurpMig.sh
+
+# Set environment variable to run BurpSuite and Firefox in headless mode
+# true -> run in headless mode, false otherwise
+ENV HEADLESS_MODE=false
+
+# Start BurpSuite
+CMD ["sh", "-c", "./startBurpMig.sh"]
+
