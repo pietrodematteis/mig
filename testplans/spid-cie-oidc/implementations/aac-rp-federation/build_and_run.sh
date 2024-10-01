@@ -30,8 +30,9 @@ sudo docker build -t aac-rp:latest --file Dockerfile-aac .
 cd ..
 # (Optional) Build AAC RP image here ---
 
-xhost +local:
+# xhost not available in a pipeline context
+# xhost +local:
 # mandatory: use "detached" mode (-d option) for pipeline
 sudo docker compose up -d --remove-orphans
 wait
-xhost -local:
+# xhost -local:
