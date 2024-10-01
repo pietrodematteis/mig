@@ -31,6 +31,7 @@ cd ..
 # (Optional) Build AAC RP image here ---
 
 xhost +local:
-sudo docker compose up
+# mandatory: use "detached" mode (-d option) for pipeline
+sudo docker compose up -d --remove-orphans
 wait
 xhost -local:
