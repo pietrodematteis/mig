@@ -110,7 +110,7 @@ execute_tests_from_json() {
 
     # Sending session and test and capturing output
     echo "Sending session and test and capturing output..."
-    curl -m 180 -X POST http://localhost:3000/send_message \
+    curl -m 1800 -X POST http://localhost:3000/send_message \
     -H "Content-Type: text/plain" \
     -H "Authorization: Bearer $TOKEN" \
     -d "$SESSION_CONTENT&$TEST_CONTENT" > output.json
