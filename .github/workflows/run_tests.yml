@@ -9,6 +9,11 @@ on:
       - master
   workflow_dispatch:
 
+env:
+  # Implementation folder
+  IMPLEMENTATION_FOLDER:spid-cie-oidc-django
+  HEADLESS_MODE=true
+  
 jobs:
   build-test:
     runs-on: ubuntu-22.04
@@ -19,22 +24,26 @@ jobs:
 
     - name: Build and run all components
       run: |
-        cd testplans/spid-cie-oidc/implementations/spid-cie-oidc-django/
+        cd testplans/spid-cie-oidc/implementations/${{ env.IMPLEMENTATION_FOLDER }}/
         chmod +x build_and_run.sh
         ./build_and_run.sh
 
     - name: Wait for the server to start
-      run: sleep 15
+      run: sleep 5
 
     - name: Run script to send API test requests
       run: |
-        cd testplans/spid-cie-oidc/implementations/spid-cie-oidc-django/
+        cd testplans/spid-cie-oidc/implementations/${{ env.IMPLEMENTATION_FOLDER }}/
         docker exec spid-cie-oidc-django-burpsuite-1 chmod +x run_tests.sh
+        # In this example, all passive tests related RP are run;
+        # the tests come from /input/mig-t/tests/single/ folder
+        # sessions are discovered form /input/mig-t/sessions/
         docker exec spid-cie-oidc-django-burpsuite-1 /run_tests.sh RP -p
+        # The output is copied from container
         docker cp spid-cie-oidc-django-burpsuite-1:/output.json output.json
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
       with:
         name: output.json
-        path: testplans/spid-cie-oidc/implementations/spid-cie-oidc-django/output.json
+        path: testplans/spid-cie-oidc/implementations/${{ env.IMPLEMENTATION_FOLDER }}/output.json

@@ -22,6 +22,7 @@ services:
       - oidcfed
     environment:
       - DISPLAY
+      #- HEADLESS_MODE=false
       #- INSTALL4J_JAVA_HOME="/usr/lib/jvm/openjdk-11" # To enable java debugger
       #- JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005" # To enable java debugger
     stdin_open: true
