@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  
+  aac-provider.org:
+    image: aac-rp
+    volumes:
+      - ../config/aac/bootstrap.yaml:/var/bootstrap.yaml
+    ports:
+      - 8080:8080
+    command: |
+      bash -c "
+      echo 'base {log_debug = on;log_info = on;log = stderr;redirector = iptables;} redsocks {local_ip = localhost;local_port = 12345;ip = burpsuite;port = 9095;type = http-connect; }' > /home/aac/redsocks.conf &&
+      #/usr/sbin/redsocks -c /home/aac/redsocks.conf &
+      #sudo iptables -t nat -A OUTPUT -p tcp --dport 8002 -j REDIRECT --to-port 12345 &
+      #sudo iptables -t nat -A OUTPUT -p tcp --dport 8000 -j REDIRECT --to-port 12345 &
+      java org.springframework.boot.loader.JarLauncher"
+    privileged: true
+    environment:
+      - ADMIN_PASSWORD=Lab2023
+      - SERVER_PORT=8080
+      - APPLICATION_EXT_URL=http://aac-provider.org:8080
+      - BOOTSTRAP=file:///var/bootstrap.yaml
+      - BOOTSTRAP_APPLY=true
+      - LANG='en_US.UTF-8'
+      - LOG_LEVEL=DEBUG
+    network_mode: host
+    #networks:
+    #  - oidcfed
+    extra_hosts:
+      - trust-anchor.org:127.0.0.1
+      - cie-provider.org:127.0.0.1
+      - burpsuite:127.0.0.1
+
+networks:
+  oidcfed:

@@ -1,0 +1,112 @@
+version: "3"
+
+services:
+  burpsuite:
+    image: i-mig-t # Use this if you build locally
+    #image: ghcr.io/stfbk/mig-i-mig-t:v2.2
+    volumes:
+      - /tmp/.X11-unix/:/tmp/.X11-unix/
+      - /etc/localtime:/etc/localtime:ro
+      - "$HOME/.Xauthority:/root/.Xauthority:rw"
+      - ../config/mig-t/msg_def.json:/opt/BurpSuiteCommunity/msg_def.json
+      - ../config/mig-t/msg_def.json:/msg_def.json
+      - ../logs/:/opt/BurpSuiteCommunity/logs # Log folder
+      - ../input:/input # Input folder
+    #ports:
+      #- 9095:9095
+      #- 3000:3000 # Expose port 3000 from Docker to the host to be able to use the APIs.
+      #- "5005:5005" # To enable java debugger
+    networks:
+      - oidcfed
+    environment:
+      - DISPLAY
+      #- INSTALL4J_JAVA_HOME="/usr/lib/jvm/openjdk-11" # To enable java debugger
+      #- JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005" # To enable java debugger
+      - HEADLESS_MODE=true
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "
+      echo 'base {log_debug = on;log_info = on;log = stderr;redirector = iptables;} redsocks {local_ip = localhost;local_port = 12345;ip = test-proxy;port = 8080;type = http-connect; }' > /etc/redsocks.conf &&
+      /usr/sbin/redsocks -c /etc/redsocks.conf &
+      iptables -t nat -A OUTPUT -p tcp -d 8080 -j REDIRECT -o 12345 &&
+      /startBurpMig.sh"
+    extra_hosts:
+      - "aac-provider.org:172.17.0.1"
+    privileged: true
+    
+  trust-anchor.org:
+    #image: ghcr.io/italia/spid-cie-oidc-django:v1.2.0
+    #image: ghcr.io/italia/spid-cie-oidc-django:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    #ports:
+      #- 8000:8000
+    volumes:
+      - ./examples-docker/federation_authority:/django-project
+    networks:
+      - oidcfed
+    command: |
+      bash -c "
+      echo 'base {log_debug = off;log_info = on;log = stderr;redirector = iptables;} redsocks {local_ip = localhost;local_port = 12345;ip = burpsuite;port = 9095;type = http-connect; }' > /etc/redsocks.conf &&
+      /usr/sbin/redsocks -c /etc/redsocks.conf &
+      iptables -t nat -A OUTPUT -p tcp --dport 8002 -j REDIRECT --to-port 12345 &&
+      iptables -t nat -A OUTPUT -p tcp --dport 8080 -j REDIRECT --to-port 12345 &&
+      cd /django-project/ &&
+      python3 manage.py migrate &&
+      python3 manage.py loaddata dumps/example.json &&
+      python3 manage.py runserver 0.0.0.0:8000"
+    privileged: true
+    extra_hosts:
+      - "aac-provider.org:172.17.0.1"
+
+
+  cie-provider.org:
+    #image: ghcr.io/italia/spid-cie-oidc-django:v1.2.0
+    #image: ghcr.io/italia/spid-cie-oidc-django:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    #ports:
+      #- 8002:8002
+    volumes:
+      - ./examples-docker/provider:/django-project
+    networks:
+      - oidcfed
+    depends_on:
+      - trust-anchor.org
+    command: |
+      bash -c "
+      echo 'base {log_debug = off;log_info = on;log = stderr;redirector = iptables;} redsocks {local_ip = localhost;local_port = 12345;ip = burpsuite;port = 9095;type = http-connect; }' > /etc/redsocks.conf &&
+      /usr/sbin/redsocks -c /etc/redsocks.conf &
+      iptables -t nat -A OUTPUT -p tcp --dport 8080 -j REDIRECT --to-port 12345 &&
+      iptables -t nat -A OUTPUT -p tcp --dport 8000 -j REDIRECT --to-port 12345 &&
+      cd /django-project/ &&
+      python3 manage.py migrate &&
+      python3 manage.py loaddata dumps/example.json &&
+      python3 manage.py runserver 0.0.0.0:8002"
+    privileged: true
+    extra_hosts:
+      - "aac-provider.org:172.17.0.1"
+
+  test-proxy:
+    image: nginx:latest
+    volumes:
+      - ../config/proxy/nginx.conf:/etc/nginx/nginx.conf
+      - ../config/proxy/certs:/etc/ssl/certs
+    ports:
+      - 8000:8000
+      - 8002:8002
+      - 3000:3000
+    networks:
+      - oidcfed
+    depends_on:		 
+      - burpsuite
+    privileged: true
+    extra_hosts:
+      - "aac-provider.org:172.17.0.1"
+  
+  
+networks:
+  oidcfed:

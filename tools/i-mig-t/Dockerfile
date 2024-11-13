@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 # Basic needs
-RUN apt update && apt install -y wget bzip2 libqt5gui5 libcanberra-gtk-module libcanberra-gtk3-module libnss3 libdbus-glib-1-2 openjdk-19-jdk curl jq
+RUN apt update && apt install -y wget bzip2 libqt5gui5 libcanberra-gtk-module libcanberra-gtk3-module libnss3 libdbus-glib-1-2 openjdk-19-jdk curl jq iptables redsocks
 
 #ENV DISPLAY=$DISPLAY
 
