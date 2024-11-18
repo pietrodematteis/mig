@@ -15,6 +15,10 @@ cd spid-cie-oidc-django
 bash docker-prepare.sh
 # clone and build spid-cie-oidc-django ---
 
+#local build proxy
+cp ../edited_files/Dockerfile-proxy .
+sudo docker build -f Dockerfile-proxy -t mig-proxy .
+
 # # local build i-mig-t --------
 #cd ../../../../../tools/i-mig-t
 # # rm mig-t-beta-jar-with-dependencies.jar

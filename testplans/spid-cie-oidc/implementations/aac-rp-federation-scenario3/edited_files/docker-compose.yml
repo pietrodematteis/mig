@@ -91,7 +91,7 @@ services:
       - "aac-provider.org:172.17.0.1"
 
   test-proxy:
-    image: nginx:latest
+    image: mig-proxy # Use this build locally
     volumes:
       - ../config/proxy/nginx.conf:/etc/nginx/nginx.conf
       - ../config/proxy/certs:/etc/ssl/certs
@@ -103,6 +103,13 @@ services:
       - oidcfed
     depends_on:		 
       - burpsuite
+    command: |
+      bash -c "
+      echo 'base {log_debug = on;log_info = on;log = stderr;redirector = iptables;} redsocks {local_ip = localhost;local_port = 12345;ip = burpsuite;port = 9095;type = http-connect; }' > /etc/redsocks.conf &&
+      /usr/sbin/redsocks -c /etc/redsocks.conf &
+      iptables -t nat -A OUTPUT -p tcp --dport 8002 -j REDIRECT --to-port 12345 &
+      iptables -t nat -A OUTPUT -p tcp --dport 8000 -j REDIRECT --to-port 12345 &
+      nginx -g 'daemon off;' "
     privileged: true
     extra_hosts:
       - "aac-provider.org:172.17.0.1"

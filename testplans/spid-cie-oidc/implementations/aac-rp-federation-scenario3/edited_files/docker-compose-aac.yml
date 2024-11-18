@@ -10,10 +10,6 @@ services:
       - 8080:8080
     command: |
       bash -c "
-      echo 'base {log_debug = on;log_info = on;log = stderr;redirector = iptables;} redsocks {local_ip = localhost;local_port = 12345;ip = burpsuite;port = 9095;type = http-connect; }' > /home/aac/redsocks.conf &&
-      #/usr/sbin/redsocks -c /home/aac/redsocks.conf &
-      #sudo iptables -t nat -A OUTPUT -p tcp --dport 8002 -j REDIRECT --to-port 12345 &
-      #sudo iptables -t nat -A OUTPUT -p tcp --dport 8000 -j REDIRECT --to-port 12345 &
       java org.springframework.boot.loader.JarLauncher"
     privileged: true
     environment:
