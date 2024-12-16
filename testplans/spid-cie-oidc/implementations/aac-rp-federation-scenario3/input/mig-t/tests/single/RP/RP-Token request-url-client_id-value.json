@@ -19,8 +19,8 @@
             "checks": [
               {
                 "in": "body",
-                "check": "client_id",
-                "is": "X_https_RP"
+                "is": "X_https_RP",
+                "check": "client_id"
               }
             ]
           }

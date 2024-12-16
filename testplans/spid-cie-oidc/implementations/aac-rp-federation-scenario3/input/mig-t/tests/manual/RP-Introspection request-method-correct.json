@@ -7,8 +7,8 @@
   "tests": [
     {
       "test": {
-        "name": "Does the Introspection Request contain the client_assertion",
-        "description": "The Introspection request made by the RP is taken and the presence of the client_assertion parameter is checked.",
+        "name": "Does the Introspection Request use HTTP POST",
+        "description": "The Introspection request made by the RP use HTTP POST",
         "type": "passive",
         "sessions": [
           "s_CIE_introsp"
@@ -18,14 +18,13 @@
             "message type": "Introspection request",
             "checks": [
               {
-                "in": "body",
-                "is present": true,
-                "check regex": "client_assertion"
+                "in": "head",
+                "check regex": "POST"
               }
             ]
           }
         ],
-        "result": "correct flow s_CIE_introsp"
+        "result": "assert_only"
       }
     }
   ]

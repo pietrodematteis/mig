@@ -25,7 +25,7 @@ services:
       - HEADLESS_MODE=true
     stdin_open: true
     tty: true
-    command: >
+    command: |
       bash -c "
       echo 'base {log_debug = on;log_info = on;log = stderr;redirector = iptables;} redsocks {local_ip = localhost;local_port = 12345;ip = test-proxy;port = 8080;type = http-connect; }' > /etc/redsocks.conf &&
       /usr/sbin/redsocks -c /etc/redsocks.conf &

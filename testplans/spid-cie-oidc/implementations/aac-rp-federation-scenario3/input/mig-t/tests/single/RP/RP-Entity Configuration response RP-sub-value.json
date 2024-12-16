@@ -7,8 +7,8 @@
   "tests": [
     {
       "test": {
-        "name": "Does the RP metadata contain the 'redirect_uris' parameter",
-        "description": "In this test the RP metadata are taken and the presence of the 'redirect_uris' parameter is checked.",
+        "name": "Does entity configuration RP contain a correct sub parameter",
+        "description": "To accomplish this test, the Entity configuration of the interested entity is taken, the payload is decoded (Base64 encoding) and the sub parameter is checked. Its value must be equal to the one in the iss parameter",
         "type": "passive",
         "sessions": [
           "s1"
@@ -19,13 +19,13 @@
             "decode operations": [
               {
                 "from": "body",
-                "decode regex": "[^\\r\\n]*",
+                "decode param": "[\\s\\S]*",
                 "type": "jwt",
                 "checks": [
                   {
                     "in": "payload",
-                    "check": "$.metadata.openid_relying_party.redirect_uris",
-                    "is present": "true"
+                    "check": "$.sub",
+                    is: "http://aac-provider.org:8080/auth/openidfed/metadata/70e62c3b-8006-47cc-a186-ea37bda004a9"
                   }
                 ]
               }

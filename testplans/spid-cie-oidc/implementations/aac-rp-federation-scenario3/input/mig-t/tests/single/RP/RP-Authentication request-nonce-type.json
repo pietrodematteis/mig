@@ -23,9 +23,9 @@
                 "type": "jwt",
                 "checks": [
                   {
+                    "check": "$.nonce",
                     "in": "payload",
-                    "check": "$",
-                    "json schema compliant": "{\"type\": \"object\", \"properties\": {\"nonce\": {\"type\": \"string\", \"pattern\": \"^[\\u0020-\\u007E]{32,}$\"}}, \"required\": [\"nonce\"]}"
+                    "check regex": "([\\x00-\\x7F]{32,})"
                   }
                 ]
               }
